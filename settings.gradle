@@ -1,0 +1,13 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            url 'https://papermc.io/repo/repository/maven-public/'
+        }
+    }
+}
+
+rootProject.name = 'coldlib'
+include 'coldlib-bukkit'
+include 'coldlib-bukkit-plugin'
+

@@ -1,0 +1,6 @@
+name: ColdLib
+version: 1.0.0
+main: net.orbyfied.coldlib.plugin.ColdLibPlugin
+api-version: 1.19
+description: The ColdLib Bukkit Bootstrap plugin
+load: STARTUP

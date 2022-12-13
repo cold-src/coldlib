@@ -1,0 +1,28 @@
+plugins {
+    // java
+    id 'java'
+    id 'java-library'
+
+    // for shading in dependencies
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+
+    // for minecraft lol
+    id ("io.papermc.paperweight.userdev") version "1.3.5"
+}
+
+group   'net.orbyfied.coldperms'
+version '1.0.0'
+
+ext {
+    hasMC = true
+    hasTesting = true
+    desc = "ColdLib Bukkit bootstrap plugin"
+
+    versionMC = "1.19.2-R0.1-SNAPSHOT"
+}
+
+apply from: '../module.gradle', to: project
+
+dependencies {
+    implementation project(":coldlib-bukkit")
+}
