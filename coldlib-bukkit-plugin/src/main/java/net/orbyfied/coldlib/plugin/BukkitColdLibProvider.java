@@ -21,6 +21,9 @@ public class BukkitColdLibProvider extends ColdLibProvider {
 
     @Override
     protected void load() {
+        // call super
+        super.load();
+
         // initialize bukkit based logger
         logGroup.withInitializer(eventLog -> {
             final Logger logger = plugin.getLogger();
@@ -34,12 +37,14 @@ public class BukkitColdLibProvider extends ColdLibProvider {
 
     @Override
     protected void enable() {
-
+        // call super
+        super.enable();
     }
 
     @Override
     protected void unload() {
-
+        // call super
+        super.unload();
     }
 
 }

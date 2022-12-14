@@ -19,4 +19,16 @@ public class ColdLibPlugin extends JavaPlugin {
         provider = ColdLibProvider.setInstance(new BukkitColdLibProvider(this));
     }
 
+    @Override
+    public void onEnable() {
+        // enable provider
+        provider.enable();
+    }
+
+    @Override
+    public void onDisable() {
+        // unload provider
+        provider.unload();
+    }
+
 }
