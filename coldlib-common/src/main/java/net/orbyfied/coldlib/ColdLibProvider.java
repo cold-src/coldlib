@@ -1,5 +1,6 @@
 package net.orbyfied.coldlib;
 
+import net.orbyfied.coldlib.util.Container;
 import net.orbyfied.j8.util.logging.EventLog;
 import net.orbyfied.j8.util.logging.EventLogs;
 
@@ -10,15 +11,21 @@ import net.orbyfied.j8.util.logging.EventLogs;
 public abstract class ColdLibProvider {
 
     /**
+     * The container for the provider instance.
+     */
+    private static final Container<ColdLibProvider> providerContainer =
+            Container.futureImmutable();
+
+    /**
      * Set the provider instance.
      * Will error if it has already been provided.
      * @throws UnsupportedOperationException If a provider has already been set.
      * @param provider The provider.
      */
     public static <P extends ColdLibProvider> P setInstance(P provider) {
-        if (instance != null)
+        if (providerContainer.isSet())
             throw new UnsupportedOperationException("A provider instance is already set");
-        instance = provider;
+        providerContainer.set(provider);
         return provider;
     }
 
@@ -27,11 +34,8 @@ public abstract class ColdLibProvider {
      * @return The provider or null if uninitialized.
      */
     public static ColdLibProvider get() {
-        return instance;
+        return providerContainer.get();
     }
-
-    // the provider instance
-    private static ColdLibProvider instance;
 
     /**
      * Get the library instance.
