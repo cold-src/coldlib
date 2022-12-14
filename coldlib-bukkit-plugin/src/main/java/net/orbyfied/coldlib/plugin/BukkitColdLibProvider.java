@@ -1,6 +1,5 @@
 package net.orbyfied.coldlib.plugin;
 
-import net.orbyfied.coldlib.ColdLib;
 import net.orbyfied.coldlib.ColdLibProvider;
 import net.orbyfied.j8.util.logging.EventLogHandler;
 
@@ -9,6 +8,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BukkitColdLibProvider extends ColdLibProvider {
+
+    /**
+     * Get the {@link ColdLibPlugin} from the active
+     * {@link ColdLibProvider}.
+     * @throws IllegalStateException If the provider is not a {@link BukkitColdLibProvider}
+     * @return The plugin.
+     */
+    public static ColdLibPlugin getActivePlugin() {
+        ColdLibProvider provider = get();
+        if (!(provider instanceof BukkitColdLibProvider b))
+            throw new IllegalStateException();
+        return b.plugin;
+    }
 
     //////////////////////////////////////
 

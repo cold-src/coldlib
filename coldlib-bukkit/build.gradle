@@ -15,7 +15,7 @@ version '1.0.0'
 
 ext {
     hasMC = true
-    hasTesting = true
+    hasTesting = false
     desc = "General purpose Bukkit library"
 
     versionMC = "1.19.2-R0.1-SNAPSHOT"

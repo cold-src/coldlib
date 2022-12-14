@@ -1,7 +1,11 @@
 package net.orbyfied.coldlib.plugin;
 
+import net.orbyfied.coldlib.ColdLib;
 import net.orbyfied.coldlib.ColdLibProvider;
+import net.orbyfied.coldlib.ColdLibService;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Locale;
 
 /**
  * The main ColdLib plugin file.
