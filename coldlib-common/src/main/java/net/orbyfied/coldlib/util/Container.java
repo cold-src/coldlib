@@ -3,6 +3,8 @@ package net.orbyfied.coldlib.util;
 import net.orbyfied.j8.util.ReflectionUtil;
 
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -41,9 +43,10 @@ public interface Container<V> {
             }
 
             @Override
-            public boolean isMutable() {
-                return false;
+            public Mutability mutability() {
+                return Mutability.UNSUPPORTED;
             }
+
         };
     }
 
@@ -83,8 +86,8 @@ public interface Container<V> {
             }
 
             @Override
-            public boolean isMutable() {
-                return !set;
+            public Mutability mutability() {
+                return set ? Mutability.UNSUPPORTED : Mutability.MODIFY;
             }
         };
     }
@@ -122,8 +125,8 @@ public interface Container<V> {
             }
 
             @Override
-            public boolean isMutable() {
-                return true;
+            public Mutability mutability() {
+                return Mutability.MODIFY;
             }
         };
     }
@@ -200,11 +203,105 @@ public interface Container<V> {
             }
 
             @Override
-            public boolean isMutable() {
+            public Mutability mutability() {
                 checkAccess();
-                return container.isMutable();
+                return container.mutability();
             }
         };
+    }
+
+    /**
+     * Create a new container wrapping the
+     * given container instance, which will,
+     * when modified, fork the instance,
+     * apply modification to the fork, and
+     * return the forked instance from the method.
+     *
+     * @param container The container to wrap.
+     * @param forkConstructor The fork function.
+     * @param <V> The value type.
+     * @return The wrapper container.
+     */
+    static <V> Container<V> forking(final Container<V> container,
+                                    final BiFunction<Container<V>, V, Container<V>> forkConstructor) {
+        // return new container
+        return new Container<>() {
+            @Override
+            public V get() {
+                return container.get();
+            }
+
+            @Override
+            public boolean isSet() {
+                return container.isSet();
+            }
+
+            @Override
+            public Container<V> set(V val) {
+                return forkConstructor.apply(container, val);
+            }
+
+            @Override
+            public Mutability mutability() {
+                return Mutability.FORK;
+            }
+        };
+    }
+
+    /**
+     * Specifies the way
+     */
+    enum Mutability {
+        /**
+         * Trying to mutate the container will throw an error.
+         * It will not have any effect.
+         */
+        UNSUPPORTED(true, false),
+
+        /**
+         * Trying to modify the container
+         * will fork it into a new instance with the
+         * modifications applied. No error will be thrown
+         * but the original instance won't be modified.
+         */
+        FORK(false, false),
+
+        /**
+         * Modifications will not throw an error
+         * and go through to affect the original
+         * instance it was called on.
+         */
+        MODIFY(false, true)
+        ;
+
+        // properties
+        final boolean throwsError;
+        final boolean modifiesInstance;
+
+        Mutability(boolean throwsError, boolean modifiesInstance) {
+            this.throwsError = throwsError;
+            this.modifiesInstance = modifiesInstance;
+        }
+
+        /**
+         * Will the call throw an error
+         * on a container with this mutability.
+         * @return If it will throw.
+         */
+        public boolean throwsError() {
+            return throwsError;
+        }
+
+        /**
+         * If a container with this mutability
+         * will modify the instance it was called
+         * on or fork/silently fail.
+         * @return If it will modify the instance.
+         */
+        public boolean modifiesInstance() {
+            return modifiesInstance;
+        }
+
     }
 
     ////////////////////////////////////////////
@@ -251,14 +348,14 @@ public interface Container<V> {
     Container<V> set(V val);
 
     /**
-     * Get if this container is mutable.
-     * This may depend on the state and not
-     * the type, so caching this value might
-     * not always work as expected.
+     * Get this containers mutability.
+     * This may depends on the current state
+     * of the container, so using an old
+     * value may have unexpected effects.
      *
-     * @return If it can be mutated.
+     * @return The active mutability settings.
      */
-    boolean isMutable();
+    Mutability mutability();
 
     /**
      * Clones this container (copies the value reference)
