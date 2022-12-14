@@ -18,10 +18,19 @@ ext {
     hasTesting = false
     desc = "General purpose Bukkit library"
 
-    versionMC = "1.19.2-R0.1-SNAPSHOT"
+//    versionMC = "1.19.2-R0.1-SNAPSHOT"
 }
 
 apply from: '../module.gradle', to: project
+
+tasks {
+    shadowJar {
+        exclude 'it/unimi/dsi/**'
+        dependencies {
+            exclude 'it/unimi/dsi/**'
+        }
+    }
+}
 
 dependencies {
 

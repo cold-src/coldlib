@@ -5,6 +5,7 @@ import net.orbyfied.coldlib.ColdLibProvider;
 import net.orbyfied.coldlib.ColdLibService;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Executable;
 import java.util.Locale;
 
 /**
@@ -19,8 +20,15 @@ public class ColdLibPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        // create library provider
-        provider = ColdLibProvider.setInstance(new BukkitColdLibProvider(this));
+        try {
+            // create library provider
+            provider = new BukkitColdLibProvider(this);
+            // register provider instance
+            ColdLibProvider.setInstance(provider);
+        } catch (Exception e) {
+            getLogger().severe("Failed to load ColdLib Bukkit");
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -18,7 +18,7 @@ ext {
     hasTesting = false
     desc = "ColdLib Bukkit bootstrap plugin"
 
-    versionMC = "1.19.2-R0.1-SNAPSHOT"
+//    versionMC = "1.19.2-R0.1-SNAPSHOT"
 }
 
 apply from: '../module.gradle', to: project

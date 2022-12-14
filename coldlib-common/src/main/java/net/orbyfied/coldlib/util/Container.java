@@ -143,6 +143,21 @@ public interface Container<V> {
     V get();
 
     /**
+     * Get the value currently stored
+     * casted to type {@code T}.
+     *
+     * @throws ClassCastException If V can not be used as T.
+     * @param tClass The target type class.
+     * @param <T> The target type.
+     * @return The casted value.
+     */
+    @SuppressWarnings("unchecked")
+    default <T> T getAs(Class<T> tClass) {
+        V val = get();
+        return (T) val;
+    }
+
+    /**
      * Get if a value is currently set.
      *
      * @return If a value is currently set.
