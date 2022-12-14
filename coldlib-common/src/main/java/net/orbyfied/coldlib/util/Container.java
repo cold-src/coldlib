@@ -1,5 +1,10 @@
 package net.orbyfied.coldlib.util;
 
+import net.orbyfied.j8.util.ReflectionUtil;
+
+import java.util.Set;
+import java.util.function.Predicate;
+
 /**
  * A class responsible for holding a
  * value and providing access to that
@@ -18,6 +23,7 @@ public interface Container<V> {
      * @return The container instance.
      */
     static <V> Container<V> finalImmutable(final V value) {
+        // return new container
         return new Container<>() {
             @Override
             public V get() {
@@ -49,6 +55,7 @@ public interface Container<V> {
      * @return The container instance.
      */
     static <V> Container<V> futureImmutable() {
+        // return new container
         return new Container<>() {
             // the current value
             V value;
@@ -93,6 +100,7 @@ public interface Container<V> {
      * @return The container instance.
      */
     static <V> Container<V> mutable(final V val) {
+        // return new container
         return new Container<>() {
             // the value currently stored
             V value = val;
@@ -131,6 +139,72 @@ public interface Container<V> {
      */
     static <V> Container<V> mutable() {
         return mutable(null);
+    }
+
+    /**
+     * Wraps the given container in an
+     * access layer protecting it against
+     * denied callers according to
+     * the provided stack frame predicate.
+     *
+     * @param container The container to wrap.
+     * @param predicate The predicate to test the frames with.
+     * @param protectNew If new instances created by any of the
+     *                   method calls of the wrapped instance
+     *                   should automatically be protected under
+     *                   the same conditions.
+     * @param <V> The value type.
+     * @return The new wrapped container.
+     */
+    static <V> Container<V> asProtected(final Container<V> container,
+                                        final Predicate<StackTraceElement> predicate,
+                                        final boolean protectNew) {
+        // return new container
+        return new Container<>() {
+            /**
+             * Check the access for the caller of
+             * the function which called this.
+             */
+            private void checkAccess() {
+                StackTraceElement element = ReflectionUtil.getCallerFrame(2,
+                        element1 -> !element1.getClassName().startsWith("net.orbyfied.coldlib"));
+                if (!predicate.test(element))
+                    throw new SecurityException("Access to container denied");
+            }
+
+            @Override
+            public V get() {
+                checkAccess();
+                return container.get();
+            }
+
+            @Override
+            public boolean isSet() {
+                checkAccess();
+                return container.isSet();
+            }
+
+            @Override
+            public Container<V> set(V val) {
+                checkAccess();
+
+                // get return value
+                Container<V> ret = container.set(val);
+
+                if (ret != container && protectNew)
+                    // protect new instances
+                    return asProtected(ret, predicate, true);
+                else
+                    // return already protected this
+                    return this;
+            }
+
+            @Override
+            public boolean isMutable() {
+                checkAccess();
+                return container.isMutable();
+            }
+        };
     }
 
     ////////////////////////////////////////////
