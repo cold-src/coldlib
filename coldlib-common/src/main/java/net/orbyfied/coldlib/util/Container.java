@@ -196,7 +196,7 @@ public interface Container<V> {
 
                 if (ret != container && protectNew)
                     // protect new instances
-                    return asProtected(ret, predicate, true);
+                    return Container.asProtected(ret, predicate, true);
                 else
                     // return already protected this
                     return this;
@@ -365,6 +365,17 @@ public interface Container<V> {
      */
     default Container<V> cloneMutable() {
         return mutable(get());
+    }
+
+    /* QOL Methods */
+
+    default Container<V> asProtected(Predicate<StackTraceElement> predicate,
+                                     boolean newProtected) {
+        return asProtected(this, predicate, newProtected);
+    }
+
+    default Container<V> asForking(BiFunction<Container<V>, V, Container<V>> forkConstructor) {
+        return forking(this, forkConstructor);
     }
 
 }
