@@ -29,6 +29,7 @@ public class BukkitColdLibProvider extends ColdLibProvider {
 
     BukkitColdLibProvider(ColdLibPlugin plugin) {
         this.plugin = plugin;
+        init();
     }
 
     @Override

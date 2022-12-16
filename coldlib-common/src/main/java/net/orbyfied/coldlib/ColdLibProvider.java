@@ -52,7 +52,7 @@ public abstract class ColdLibProvider {
     ////////////////////////////////////////////////////
 
     // constructor
-    protected ColdLibProvider() {
+    protected void init() {
         // instantiate the library
         this.lib = new ColdLib(this);
 

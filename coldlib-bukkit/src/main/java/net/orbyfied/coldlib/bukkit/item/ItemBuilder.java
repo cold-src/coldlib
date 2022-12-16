@@ -9,6 +9,9 @@ import net.orbyfied.coldlib.util.Self;
 import net.orbyfied.j8.util.reflect.Reflector;
 import org.bukkit.Material;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.function.Consumer;
@@ -71,8 +74,9 @@ public class ItemBuilder<S extends ItemBuilder> implements Container<ItemStack>,
      * @param amount The stack count.
      * @return The builder.
      */
-    public static ItemBuilder<ItemBuilder> create(Item item, int amount) {
-        return new ItemBuilder<>(new ItemStack(item, amount));
+    @SuppressWarnings("unchecked")
+    public static <S extends ItemBuilder<S>> S create(Item item, int amount) {
+        return (S) new ItemBuilder<S>(new ItemStack(item, amount));
     }
 
     /**
@@ -83,8 +87,9 @@ public class ItemBuilder<S extends ItemBuilder> implements Container<ItemStack>,
      * @param amount The stack count.
      * @return The builder.
      */
-    public static ItemBuilder<ItemBuilder> create(Material material, int amount) {
-        return create(LegacyNmsHelper.getNMSMaterial(material), amount);
+    @SuppressWarnings("unchecked")
+    public static <S extends ItemBuilder<S>> S create(Material material, int amount) {
+        return (S) create(LegacyNmsHelper.getNMSMaterial(material), amount);
     }
 
     //////////////////////////////////////////////
@@ -121,7 +126,7 @@ public class ItemBuilder<S extends ItemBuilder> implements Container<ItemStack>,
      * @return The adapter.
      */
     @SuppressWarnings("all")
-    public <A extends Container<ItemStack>> A use(Class<A> aClass) {
+    public <A extends Container<ItemStack>> A use(Class<? super A> aClass) {
         try {
             // create proxy
             A instance = (A) Proxy.newProxyInstance(aClass.getClassLoader(),
@@ -132,8 +137,17 @@ public class ItemBuilder<S extends ItemBuilder> implements Container<ItemStack>,
                             return ItemBuilder.this.get();
                         }
 
-                        // invoke normal method
-                        return method.invoke(proxy, args);
+                        if (method.isDefault()) {
+                            // invoke method normally
+                            return InvocationHandler.invokeDefault(
+                                    proxy,
+                                    method,
+                                    args
+                            );
+                        } else {
+                            // unknown method
+                            return null;
+                        }
                     }));
 
             // return proxy instance
@@ -154,7 +168,7 @@ public class ItemBuilder<S extends ItemBuilder> implements Container<ItemStack>,
      * @return The adapter.
      */
     @SuppressWarnings("all")
-    public <A extends Container<ItemStack>> S use(Class<A> aClass,
+    public <A extends Container<ItemStack>> S use(Class<? super A> aClass,
                                                   Consumer<A> consumer) {
         // create instance
         A instance = use(aClass);

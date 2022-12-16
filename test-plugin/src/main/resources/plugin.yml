@@ -1,0 +1,6 @@
+name: TestPlugin
+version: 1.0.0
+main: test.orbyfied.coldlib.TestPlugin
+api-version: 1.19
+depend:
+  - ColdLib
