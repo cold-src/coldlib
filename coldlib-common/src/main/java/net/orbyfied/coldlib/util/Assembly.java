@@ -183,6 +183,8 @@ public class Assembly<I, T, O> {
     public static <I, T, O> Builder<I, T, O> builder(Class<I> iClass,
                                                      Class<T> tClass,
                                                      Class<O> oClass) {
+        Objects.requireNonNull(iClass);
+        Objects.requireNonNull(tClass);
         return new Builder<>(
                 iClass,
                 tClass,
