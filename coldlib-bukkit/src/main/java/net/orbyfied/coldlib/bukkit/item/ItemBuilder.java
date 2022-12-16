@@ -189,7 +189,7 @@ public class ItemBuilder<S extends ItemBuilder> implements Container<ItemStack>,
      * @return The Bukkit stack.
      */
     public org.bukkit.inventory.ItemStack build() {
-        return get().asBukkitMirror();
+        return LegacyNmsHelper.getBukkitItemMirror(nmsStack);
     }
 
     /**
