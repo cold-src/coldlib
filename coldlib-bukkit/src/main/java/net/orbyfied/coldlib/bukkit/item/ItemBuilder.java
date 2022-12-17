@@ -9,8 +9,7 @@ import net.orbyfied.coldlib.util.Self;
 import net.orbyfied.j8.util.reflect.Reflector;
 import org.bukkit.Material;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -52,6 +51,8 @@ public class ItemBuilder<S extends ItemBuilder> implements Container<ItemStack>,
         // return
         return out;
     }
+
+    /* Constructors */
 
     /**
      * Wrap the provided stack for modification,
@@ -179,6 +180,16 @@ public class ItemBuilder<S extends ItemBuilder> implements Container<ItemStack>,
 
         // return this
         return self();
+    }
+
+    /**
+     * Get or create the compound tag of
+     * the item.
+     *
+     * @return The compound tag.
+     */
+    public CompoundTag tag() {
+        return nmsStack.getOrCreateTag();
     }
 
     /**

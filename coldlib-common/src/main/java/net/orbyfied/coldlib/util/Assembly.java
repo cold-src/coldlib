@@ -1,5 +1,9 @@
 package net.orbyfied.coldlib.util;
 
+import net.orbyfied.coldlib.ColdLib;
+import net.orbyfied.coldlib.ColdLibProvider;
+import net.orbyfied.coldlib.ColdLibService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

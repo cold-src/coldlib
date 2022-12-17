@@ -55,23 +55,27 @@ java {
 
 // Task Configuration
 
+assemble {
+    dependsOn(shadowJar) }
+
+if (hasMc()) {
+    assemble { dependsOn(shadowJar, reobfJar) }
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.release.set(17) }
+javadoc {
+    options.encoding = 'UTF-8' }
+processResources {
+    filteringCharset = 'UTF-8' }
+
 tasks {
-
-    assemble {
-        dependsOn(shadowJar) }
-
-    if (hasMc()) {
-        assemble { dependsOn(shadowJar, reobfJar) }
-    }
-
-    compileJava {
-        options.encoding = 'UTF-8'
-        options.release.set(17) }
-    javadoc {
-        options.encoding = 'UTF-8' }
-    processResources {
-        filteringCharset = 'UTF-8' }
-
+    String mcS = "";
+    if (hasMc())
+        mcS = "+" + project.versionMC;
+    String fn = project.name + "-" + project.version + mcS + ".jar";
+    outputFile(file("../builds/" + fn));
 }
 
 // Dependencies

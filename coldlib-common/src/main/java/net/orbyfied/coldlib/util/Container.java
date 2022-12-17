@@ -2,7 +2,10 @@ package net.orbyfied.coldlib.util;
 
 import net.orbyfied.j8.util.ReflectionUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -249,6 +252,72 @@ public interface Container<V> {
     }
 
     /**
+     * Create a new container wrapping the
+     * provided, already existent container,
+     * to introduce awaiting functionality.
+     * It supports multiple futures awaiting
+     * an event at once.
+     *
+     * If an error is thrown, all futures will
+     * be completed exceptionally, after which
+     * the error will be rethrown using
+     * {@link Throwables#sneakyThrow(Throwable)}.
+     *
+     * @param container The container to wrap.
+     * @param <V> The value type.
+     * @return The new, wrapper container.
+     */
+    static <V> Container<V> awaitable(final Container<V> container) {
+        // return new container
+        return new Container<>() {
+            // the futures awaiting
+            final List<CompletableFuture<V>> futures = new ArrayList<>();
+
+            @Override
+            public V get() {
+                return container.get();
+            }
+
+            @Override
+            public boolean isSet() {
+                return container.isSet();
+            }
+
+            @Override
+            public Container<V> set(V val) {
+                try {
+                    container.set(val);
+                    for (CompletableFuture<V> future : futures)
+                        future.complete(val);
+                } catch (Throwable t) {
+                    for (CompletableFuture<V> future : futures)
+                        future.completeExceptionally(t);
+                    Throwables.sneakyThrow(t);
+                }
+
+                return this;
+            }
+
+            @Override
+            public Mutability mutability() {
+                return container.mutability();
+            }
+
+            @Override
+            public boolean canAwait() {
+                return true;
+            }
+
+            @Override
+            public CompletableFuture<V> await(boolean listen) {
+                CompletableFuture<V> future = new CompletableFuture<>();
+                futures.add(future);
+                return future;
+            }
+        };
+    }
+
+    /**
      * Specifies the way
      */
     enum Mutability {
@@ -356,6 +425,48 @@ public interface Container<V> {
      * @return The active mutability settings.
      */
     Mutability mutability();
+
+    /**
+     * Get if you can await/listen a value.
+     *
+     * @return True/false.
+     */
+    default boolean canAwait() {
+        return false;
+    }
+
+    /**
+     * Awaits a value in this container
+     * if supported. If listen is set, it won't
+     * complete early if a value is already set.
+     * Otherwise, you might get a completed future
+     * if a value was already set.
+     *
+     * Check if it is supported using {@link Container#canAwait()}.
+     * By default, it will return a completed future if possible,
+     * otherwise it will throw an {@link UnsupportedOperationException}.
+     *
+     * @throws UnsupportedOperationException If awaiting is unsupported.
+     * @param listen If it should listen for a value,
+     *               or instead already complete if a
+     *               value is set.
+     * @return The future.
+     */
+    default CompletableFuture<V> await(boolean listen) {
+        // check if it can be completed
+        if (!listen && isSet())
+            return CompletableFuture.completedFuture(get());
+        // otherwise throw error
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @see Container#await(boolean)
+     * {@code listen} is defaulted to false.
+     */
+    default CompletableFuture<V> await() {
+        return await(false);
+    }
 
     /**
      * Clones this container (copies the value reference)

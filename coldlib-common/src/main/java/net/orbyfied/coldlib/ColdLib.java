@@ -1,5 +1,7 @@
 package net.orbyfied.coldlib;
 
+import net.orbyfied.coldlib.util.Container;
+
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -49,7 +51,7 @@ public class ColdLib {
      * The services by class and optionally name.
      */
     final Map<Class<?>,
-            Map<String, ColdLibService>
+            Map<String, Container<ColdLibService>>
             > serviceMap = new HashMap<>();
 
     /**
@@ -67,6 +69,49 @@ public class ColdLib {
     }
 
     /**
+     * Get or create a future reference to
+     * the specified service instance. This
+     * allows you to get, set, or await the
+     * service instance in the future.
+     *
+     * @param sClass The service class.
+     * @param instanceName The instance name (can be null).
+     * @param <S> The service type.
+     * @return The service reference.
+     */
+    @SuppressWarnings("unchecked")
+    public <S extends ColdLibService> Container<S> referenceService(Class<S> sClass,
+                                                                    String instanceName) {
+        Objects.requireNonNull(sClass, "Service class can not be null");
+
+        // get instance of class map
+        Map<String, Container<ColdLibService>> map = serviceMap.computeIfAbsent(sClass,
+                __ -> new HashMap<>());
+
+        // get and return instance container
+        return (Container<S>) map.computeIfAbsent(instanceName, __ ->
+                Container.awaitable(Container.futureImmutable())
+        );
+    }
+
+    /**
+     * Get or create a future reference to
+     * the specified service instance. This
+     * allows you to get, set, or await the
+     * service instance in the future.
+     *
+     * @param sClass The service class.
+     * @param <S> The service type.
+     * @return The service reference.
+     *
+     * @see ColdLib#referenceService(Class, String)
+     * {@code instanceName} is defaulted to null.
+     */
+    public <S extends ColdLibService> Container<S> referenceService(Class<S> sClass) {
+        return referenceService(sClass, null);
+    }
+
+    /**
      * Get a registered service.
      *
      * @param sClass The service class.
@@ -74,13 +119,8 @@ public class ColdLib {
      * @param <S> The service type.
      * @return The service or null if absent.
      */
-    @SuppressWarnings("unchecked")
     public <S extends ColdLibService> S getService(Class<S> sClass, String instanceName) {
-        Objects.requireNonNull(sClass, "Service class can not be null");
-        Map<String, ColdLibService> map = serviceMap.get(sClass);
-        if (map == null)
-            return null;
-        return (S) map.get(instanceName);
+        return referenceService(sClass, instanceName).get();
     }
 
     /**
@@ -105,10 +145,11 @@ public class ColdLib {
      * @param <S> The service type.
      * @return The service (now registered).
      */
+    @SuppressWarnings("unchecked")
     public <S extends ColdLibService> S withService(S service) {
         Objects.requireNonNull(service, "Service can not be null");
-        serviceMap.computeIfAbsent(service.getClass(), __ -> new HashMap<>())
-                .put(service.getInstanceName(), service);
+        this.referenceService((Class<S>) service.getClass(), service.getInstanceName())
+                .set(service);
         return service;
     }
 

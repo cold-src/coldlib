@@ -9,7 +9,9 @@ import net.minecraft.world.item.ItemStack;
 import net.orbyfied.coldlib.bukkit.nms.LegacyNmsHelper;
 import net.orbyfied.coldlib.util.Container;
 import net.orbyfied.coldlib.util.Self;
+import net.orbyfied.coldlib.util.logic.BitFlag;
 import org.bukkit.ChatColor;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 
 import java.util.Arrays;
@@ -52,6 +54,121 @@ public interface BasicMetaBuilder<S extends BasicMetaBuilder>
         ItemStack stack = get();
         stack.setDamageValue(stack.getMaxDamage() - value);
         return self();
+    }
+
+    /**
+     * Set the if the item is unbreakable.
+     *
+     * @param value True/false.
+     * @return This.
+     */
+    default S unbreakable(boolean value) {
+        ItemStack stack = get();
+        CompoundTag tag = stack.getOrCreateTag();
+        tag.putBoolean("Unbreakable", value);
+        return self();
+    }
+
+    /**
+     * Set the items custom model data
+     * tag to the provided value.
+     *
+     * @param value The value.
+     * @return This.
+     */
+    default S customModelData(int value) {
+        ItemStack stack = get();
+        CompoundTag tag = stack.getOrCreateTag();
+        tag.putInt("CustomModelData", value);
+        return self();
+    }
+
+    /**
+     * Set the provided {@link HideFlag} to the
+     * given value in the item tag.
+     *
+     * @param flag The hide/bit flag.
+     * @param value The value to set.
+     * @return This.
+     */
+    default S hideFlag(BitFlag flag, boolean value) {
+        ItemStack stack = get();
+        CompoundTag tag = stack.getOrCreateTag();
+
+        int i = tag.contains("HideFlags", Tag.TAG_INT) ? tag.getInt("HideFlags") : 0;
+        i = flag.set(i, value);
+
+        tag.putInt("HideFlags", i);
+
+        // return self
+        return self();
+    }
+
+    /**
+     * Set all provided flags to the same
+     * given value in the item tag.
+     *
+     * @param value The value to set them all to.
+     * @param flags The flags to set.
+     * @return This.
+     */
+    default S hideFlags(boolean value, HideFlag... flags) {
+        ItemStack stack = get();
+        CompoundTag tag = stack.getOrCreateTag();
+
+        int i = tag.contains("HideFlags", Tag.TAG_INT) ? tag.getInt("HideFlags") : 0;
+        for (HideFlag flag : flags)
+            i = flag.set(i, value);
+
+        tag.putInt("HideFlags", i);
+
+        // return self
+        return self();
+    }
+
+    /**
+     * Set the repair cost in levels for this item.
+     *
+     * @param cost The repair cost.
+     * @return This.
+     */
+    default S repairCost(int cost) {
+        ItemStack stack = get();
+        CompoundTag tag = stack.getOrCreateTag();
+        tag.putInt("RepairCost", cost);
+
+        // return self
+        return self();
+    }
+
+    /**
+     * Adds an attribute modifier for the
+     * specified attribute.
+     *
+     * @param attribute The identifier of the attribute to apply to.
+     * @param modifier The modifier to apply.
+     * @return This.
+     */
+    default S addAttributeModifier(String attribute, AttributeModifier modifier) {
+        ItemStack stack = get();
+        CompoundTag tag = stack.getOrCreateTag();
+        ListTag modsTag = getOrCreateList(tag, "AttributeModifiers", Tag.TAG_COMPOUND);
+
+        CompoundTag modTag = new CompoundTag();
+        modTag.putString("AttributeName", attribute);
+        modifier.save(modTag);
+
+        modsTag.add(modTag);
+
+        // return self
+        return self();
+    }
+
+    /**
+     * @see BasicMetaBuilder#addAttributeModifier(String, AttributeModifier)
+     */
+    default S addAttributeModifier(Attribute attribute, AttributeModifier modifier) {
+        return addAttributeModifier(attribute.getKey().toString(), modifier);
     }
 
     /**
