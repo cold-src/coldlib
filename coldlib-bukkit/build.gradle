@@ -3,6 +3,10 @@ plugins {
     id 'java'
     id 'java-library'
 
+    // package publishing
+    id 'maven-publish'
+    id 'signing'
+
     // for shading in dependencies
     id "com.github.johnrengelman.shadow" version "7.1.2"
 

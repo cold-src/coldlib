@@ -1,15 +1,26 @@
 package test.orbyfied.coldlib.util;
 
-import net.orbyfied.coldlib.util.Assembly;
 import net.orbyfied.coldlib.util.Container;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class ContainerTest {
+
+    //
+    // Test: Chained
+    //
+
+    @Test
+    void test_ModChain() {
+        Container<Integer> integerContainer =
+                Container.atomic();
+        Container<String>  stringContainer  =
+                integerContainer.biMap(String::valueOf, Integer::parseInt);
+
+        System.out.println(integerContainer.get());
+        stringContainer.set("69");
+        System.out.println(integerContainer.get());
+    }
 
     //
     // Test: Protected
@@ -22,7 +33,7 @@ public class ContainerTest {
         Assertions.assertEquals("Hello, World!", container.get());
 
         // protect container
-        final Container<String> protectedContainer = Container.asProtected(
+        final Container<String> protectedContainer = Container.protect(
                 container,
                 element -> element.getMethodName().equals("test_Protected"),
                 false

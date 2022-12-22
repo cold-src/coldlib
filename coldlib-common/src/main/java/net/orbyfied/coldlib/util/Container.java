@@ -4,11 +4,12 @@ import net.orbyfied.j8.util.ReflectionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * A class responsible for holding a
@@ -137,7 +138,7 @@ public interface Container<V> {
     /**
      * Create a new mutable container instance
      * without a value pre-set. Just calls
-     * {@link Container#mutable(V)} with null
+     * {@link Container#mutable(Object)} with null
      * provided as the pre-set value.
      *
      * @param <V> The value type.
@@ -162,9 +163,9 @@ public interface Container<V> {
      * @param <V> The value type.
      * @return The new wrapped container.
      */
-    static <V> Container<V> asProtected(final Container<V> container,
-                                        final Predicate<StackTraceElement> predicate,
-                                        final boolean protectNew) {
+    static <V> Container<V> protect(final Container<V> container,
+                                    final Predicate<StackTraceElement> predicate,
+                                    final boolean protectNew) {
         // return new container
         return new Container<>() {
             /**
@@ -199,7 +200,7 @@ public interface Container<V> {
 
                 if (ret != container && protectNew)
                     // protect new instances
-                    return Container.asProtected(ret, predicate, true);
+                    return Container.protect(ret, predicate, true);
                 else
                     // return already protected this
                     return this;
@@ -313,6 +314,202 @@ public interface Container<V> {
                 CompletableFuture<V> future = new CompletableFuture<>();
                 futures.add(future);
                 return future;
+            }
+        };
+    }
+
+    /**
+     * Wraps the provided container to make it
+     * immutable. This does not affect the original
+     * instance, so you can still modify the value
+     * using the original instance.
+     *
+     * @param container The container to wrap.
+     * @param <V> The value type.
+     * @return The immutable container wrapper.
+     */
+    static <V> Container<V> immutable(Container<V> container) {
+        return new Container<V>() {
+            @Override
+            public V get() {
+                return container.get();
+            }
+
+            @Override
+            public boolean isSet() {
+                return container.isSet();
+            }
+
+            @Override
+            public Container<V> set(V val) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Mutability mutability() {
+                return Mutability.UNSUPPORTED;
+            }
+        };
+    }
+
+    /**
+     * Create a new container which lazy loads
+     * the value using the provided supplier when
+     * it is first queried.
+     *
+     * This container is immutable.
+     *
+     * @param supplier The lazy loader.
+     * @param <V> The value type.
+     * @return The lazy loaded container instance.
+     */
+    static <V> Container<V> lazy(Supplier<V> supplier) {
+        return new Container<>() {
+            // if we have a cached value
+            boolean hasCached;
+            // the cached value
+            V cached;
+
+            @Override
+            public V get() {
+                if (!hasCached) {
+                    cached = supplier.get();
+                    hasCached = true;
+                }
+
+                return cached;
+            }
+
+            @Override
+            public boolean isSet() {
+                return true;
+            }
+
+            @Override
+            public Container<V> set(V val) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Mutability mutability() {
+                return Mutability.UNSUPPORTED;
+            }
+        };
+    }
+
+    /**
+     * A mutable container which stores the current
+     * value in an atomic reference making it thread
+     * safe.
+     *
+     * @param <V> The value type.
+     * @return The atomic container instance.
+     */
+    static <V> Container<V> atomic() {
+        return new Container<>() {
+            // the reference
+            final AtomicReference<V> reference = new AtomicReference<>();
+            // if a value is set
+            boolean set;
+
+            @Override
+            public V get() {
+                return reference.get();
+            }
+
+            @Override
+            public boolean isSet() {
+                return set;
+            }
+
+            @Override
+            public Container<V> set(V val) {
+                set = true;
+                reference.set(val);
+                return this;
+            }
+
+            @Override
+            public Mutability mutability() {
+                return Mutability.MODIFY;
+            }
+        };
+    }
+
+    /**
+     * Wraps the given container with the provided
+     * mapping function to return an immutable container
+     * which maps the queried value of type {@code V} to
+     * a value of type {@code T}.
+     *
+     * @param container The container to wrap.
+     * @param function The V -> R mapper.
+     * @param <V> The original value type.
+     * @param <R> The mapped value type.
+     * @return The mapping container.
+     */
+    static <V, R> Container<R> mapped(final Container<V> container,
+                                      final Function<V, R> function) {
+        return new Container<R>() {
+            @Override
+            public R get() {
+                return function.apply(container.get());
+            }
+
+            @Override
+            public boolean isSet() {
+                return container.isSet();
+            }
+
+            @Override
+            public Container<R> set(R val) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Mutability mutability() {
+                return Mutability.UNSUPPORTED;
+            }
+        };
+    }
+
+    /**
+     * Wraps the given container with a two-way mapping system
+     * returning a bi-mapped container, which converts
+     * between {@code V} and {@code R} for setting and getting.
+     * This container retains the mutability of the wrapped container,
+     * meaning it can be mutable.
+     *
+     * @param container The container to wrap.
+     * @param toFunction The V -> R function.
+     * @param fromFunction The R -> V function.
+     * @param <V> The original value type.
+     * @param <R> The mapped value type.
+     * @return The mapping container.
+     */
+    static <V, R> Container<R> biMapped(final Container<V> container,
+                                        final Function<V, R> toFunction,
+                                        final Function<R, V> fromFunction) {
+        return new Container<R>() {
+            @Override
+            public R get() {
+                return toFunction.apply(container.get());
+            }
+
+            @Override
+            public boolean isSet() {
+                return container.isSet();
+            }
+
+            @Override
+            public Container<R> set(R val) {
+                container.set(fromFunction.apply(val));
+                return this;
+            }
+
+            @Override
+            public Mutability mutability() {
+                return container.mutability();
             }
         };
     }
@@ -482,11 +679,24 @@ public interface Container<V> {
 
     default Container<V> asProtected(Predicate<StackTraceElement> predicate,
                                      boolean newProtected) {
-        return asProtected(this, predicate, newProtected);
+        return protect(this, predicate, newProtected);
     }
 
     default Container<V> asForking(BiFunction<Container<V>, V, Container<V>> forkConstructor) {
         return forking(this, forkConstructor);
+    }
+
+    default Container<V> immutable() {
+        return immutable(this);
+    }
+
+    default <R> Container<R> map(Function<V, R> function) {
+        return Container.mapped(this, function);
+    }
+
+    default <R> Container<R> biMap(Function<V, R> toFunction,
+                                   Function<R, V> fromFunction) {
+        return Container.biMapped(this, toFunction, fromFunction);
     }
 
 }
