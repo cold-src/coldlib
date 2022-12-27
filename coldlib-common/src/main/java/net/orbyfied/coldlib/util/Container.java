@@ -336,7 +336,7 @@ public interface Container<V> {
      * @return The immutable container wrapper.
      */
     static <V> Container<V> immutable(Container<V> container) {
-        return new Container<V>() {
+        return new Container<>() {
             @Override
             public V get() {
                 return container.get();
