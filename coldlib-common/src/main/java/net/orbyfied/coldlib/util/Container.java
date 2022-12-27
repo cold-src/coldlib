@@ -490,7 +490,7 @@ public interface Container<V> {
     static <V, R> Container<R> biMapped(final Container<V> container,
                                         final Function<V, R> toFunction,
                                         final Function<R, V> fromFunction) {
-        return new Container<R>() {
+        return new Container<>() {
             @Override
             public R get() {
                 return toFunction.apply(container.get());
@@ -573,11 +573,43 @@ public interface Container<V> {
     ////////////////////////////////////////////
 
     /**
-     * Get the value currently stored.
+     * Issue the value currently stored.
+     *
+     * This operation doesn't necessarily return
+     * the exact currently stored value. Wrapper
+     * containers may (often do) override this
+     * method to lazy processing when called.
      *
      * @return The value of type {@code V}
      */
     V get();
+
+    /**
+     * Try to issue the value currently stored,
+     * return a successful result containing the value
+     * if successful, or failed when an error occurs or
+     * the operation simply failed.
+     *
+     * This operation doesn't necessarily return
+     * the exact currently stored value. Wrapper
+     * containers may (often do) override this
+     * method to lazy processing when called.
+     *
+     * The default implementation calls {@link Container#get()}
+     * and catches any errors it might throw to produce a result.
+     *
+     * @return The result.
+     */
+    default Result<V> issue() {
+        try {
+            // attempt to call Container#get(...)
+            // and return the result as success
+            return Result.success(get());
+        } catch (Throwable err) {
+            // catch error and return failed result
+            return Result.failed(err);
+        }
+    }
 
     /**
      * Get the value currently stored
@@ -697,6 +729,10 @@ public interface Container<V> {
     default <R> Container<R> biMap(Function<V, R> toFunction,
                                    Function<R, V> fromFunction) {
         return Container.biMapped(this, toFunction, fromFunction);
+    }
+
+    default Container<V> awaitable() {
+        return awaitable(this);
     }
 
 }
