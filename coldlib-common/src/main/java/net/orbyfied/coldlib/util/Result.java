@@ -1,5 +1,7 @@
 package net.orbyfied.coldlib.util;
 
+import java.util.function.Supplier;
+
 /**
  * Construct to hold the result of an
  * operation which could have thrown
@@ -20,6 +22,19 @@ public class Result<V> {
      */
     public static <V> Result<V> success(final V value) {
         return new Result<>(value, null);
+    }
+
+    /**
+     * Create a new success result, but without
+     * a value set or marked as set. The returned
+     * instance will never have a value set or
+     * marked as set.
+     *
+     * @param <V> The value type.
+     * @return The result instance.
+     */
+    public static <V> Result<V> unset() {
+        return new Result<>(null, NO_VALUE);
     }
 
     /**
@@ -143,6 +158,20 @@ public class Result<V> {
         if (isPresent())
             return value;
         return def;
+    }
+
+    /**
+     * Get the value if present or result of the provided
+     * default/fallback if absent. This uses
+     * {@link Result#isPresent()} to check presence.
+     *
+     * @param def The fallback value supplier.
+     * @return The value.
+     */
+    public V orElseGet(Supplier<V> def) {
+        if (isPresent())
+            return value;
+        return def.get();
     }
 
     /**

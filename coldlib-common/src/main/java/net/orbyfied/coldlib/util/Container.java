@@ -602,12 +602,18 @@ public interface Container<V> {
      * containers may (often do) override this
      * method to lazy processing when called.
      *
-     * The default implementation calls {@link Container#get()}
-     * and catches any errors it might throw to produce a result.
+     * The default implementation checks if the container
+     * has a value set, if not, it returns {@link Result#unset()}.
+     * Otherwise it calls {@link Container#get()} and catches any
+     * errors it might throw to produce a result.
      *
      * @return The result.
      */
     default Result<V> issue() {
+        // check if set
+        if (!isSet())
+            return Result.unset();
+
         try {
             // attempt to call Container#get(...)
             // and return the result as success
@@ -616,6 +622,30 @@ public interface Container<V> {
             // catch error and return failed result
             return Result.failed(err);
         }
+    }
+
+    /**
+     * Get the value if set, or return the
+     * provided fallback if absent. Utilizes
+     * {@link Container#isSet()} for checks.
+     *
+     * @param def The fallback value.
+     * @return The value.
+     */
+    default V orElse(V def) {
+        return isSet() ? get() : def;
+    }
+
+    /**
+     * Get the value if set, or return the result
+     * of provided fallback if absent. Utilizes
+     * {@link Container#isSet()} for checks.
+     *
+     * @param def The fallback value supplier.
+     * @return The value.
+     */
+    default V orElseGet(Supplier<V> def) {
+        return isSet() ? get() : def.get();
     }
 
     /**

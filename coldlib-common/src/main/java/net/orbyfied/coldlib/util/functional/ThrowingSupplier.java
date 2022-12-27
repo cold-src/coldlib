@@ -11,7 +11,8 @@ import java.util.function.Supplier;
  * any throwables that might be thrown.
  *
  * This class extends {@link java.util.function.Supplier} for inter-op.
- * When {@link Supplier#get()} is called,
+ * When {@link Supplier#get()} is called, it calls {@link ThrowingSupplier#issue()}
+ * and rethrows any caught errors that may occur.
  *
  * @param <T> The value type.
  */
