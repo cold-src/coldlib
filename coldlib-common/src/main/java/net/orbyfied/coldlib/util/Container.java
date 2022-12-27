@@ -198,9 +198,13 @@ public interface Container<V> {
                 // get return value
                 Container<V> ret = container.set(val);
 
-                if (ret != container && protectNew)
-                    // protect new instances
-                    return Container.protect(ret, predicate, true);
+                if (ret != container)
+                    if (protectNew)
+                        // protect new instances
+                        return Container.protect(ret, predicate, true);
+                    else
+                        // dont protect new instance
+                        return ret;
                 else
                     // return already protected this
                     return this;
