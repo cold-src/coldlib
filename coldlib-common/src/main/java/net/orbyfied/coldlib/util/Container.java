@@ -316,7 +316,10 @@ public interface Container<V> {
             @Override
             public CompletableFuture<V> await(boolean listen) {
                 CompletableFuture<V> future = new CompletableFuture<>();
-                futures.add(future);
+                if (!listen && isSet())
+                    future.complete(get());
+                else
+                    futures.add(future);
                 return future;
             }
         };
