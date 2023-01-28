@@ -12,4 +12,5 @@ include 'coldlib-bukkit'
 include 'coldlib-bukkit-plugin'
 include 'coldlib-common'
 include 'test-plugin'
+include 'coldlib-bootstrap-bungee'
 

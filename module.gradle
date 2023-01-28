@@ -1,25 +1,78 @@
+/*
+ *
+ * Cold Collective common module Gradle build script.
+ * This script can and will be used across all projects.
+ *
+ * Can be included into an
+ *
+ * By Orbyfied 2023
+ *
+ */
+
+
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.OpenOption
+import java.nio.file.Path
+import java.nio.file.StandardOpenOption
+
+/* Function Declarations */
+
+/**
+ * Get a property on this module. This will
+ * first attempt to get it on this project,
+ * following the parent chain while it can't
+ * find it set. If no property is ever found,
+ * the default value is returned.
+ *
+ * @param name The name of the property.
+ * @param d The default value.
+ * @return The value or default if absent.
+ */
+/* had to include public cuz otherwise generics fucked it */
+public <T> T propertyOr(String name, Object d) {
+    Project curr = project
+    while (!curr.hasProperty(name)) {
+        curr = curr.parent
+        if (curr == null) {
+            return (T)d
+        }
+    }
+
+    return (T)curr.property(name)
+}
+
+// check if this module requires minecraft (paperweight userdev)
 boolean hasMc() {
-    return project.hasProperty("hasMC") && project.hasMC
+    return propertyOr("hasMC", false)
 }
 
+// check if this module enables testing
 boolean hasTesting() {
-    return project.hasProperty("hasTesting") && project.hasTesting
+    return propertyOr("hasTesting", false)
 }
 
+// check if this module enables publishing
 boolean hasPublishing() {
     return plugins.hasPlugin("maven-publish") && plugins.hasPlugin("signing")
 }
 
-File getResourceInRoot(String str) {
-    File res = new File("./" + str)
-    if (!res.exists())
-        res = new File("../" + str)
-    return res
+// try to get a file in the root project folder
+File fileInRoot(String str) {
+    return new File(project.rootDir, str);
 }
 
-// Plugins
+// try to get a patj (file) in the root project folder
+Path pathInRoot(String str) {
+    return project.rootDir.toPath().resolve(str)
+}
 
-group 'net.orbyfied.coldlib'
+/* Properties */
+
+// set group to root project group
+group rootProject.group
+
+/* Minecraft Paperweight Configuration */
 
 if (hasMc()) {
     // set default minecraft version
@@ -37,7 +90,7 @@ if (hasMc()) {
     }
 }
 
-group 'net.orbyfied.coldlib'
+/* Plugins */
 
 // apply java plugins
 apply plugin: 'java'
@@ -46,18 +99,20 @@ apply plugin: 'java-library'
 // apply shadow
 apply plugin: 'com.github.johnrengelman.shadow'
 
+// apply userdev plugin
 if (hasMc()) {
-    apply plugin: 'io.papermc.paperweight.userdev'
+    apply plugin: "io.papermc.paperweight.userdev"
+}
+
+/* Task Configuration */
+
+java {
+    // set language version
+    toolchain.languageVersion.set(JavaLanguageVersion.of(this.<Integer>propertyOr("languageVersion", 17)))
 }
 
 java {
-    // Configure the java toolchain. This allows gradle to auto-provision JDK 17 on systems that only have JDK 8 installed for example.
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-}
-
-// Task Configuration
-
-java {
+    /// include javadoc and sources
     if (plugins.hasPlugin("java-library")) {
         withJavadocJar()
         withSourcesJar()
@@ -76,13 +131,17 @@ if (plugins.hasPlugin("java-library")) {
     }
 }
 
+// make sure publish depends
+// on build if publishing is enabled
 if (hasPublishing()) {
     publish.dependsOn.add(tasks.jar)
 }
 
+// configure shadow
 assemble {
     dependsOn(shadowJar) }
 
+// paperweight
 if (hasMc()) {
     assemble { dependsOn(shadowJar, reobfJar) }
 }
@@ -95,20 +154,22 @@ javadoc {
 processResources {
     filteringCharset = 'UTF-8' }
 
+
 tasks {
-    String mcS = "";
+    String mcS = ""
     if (hasMc())
-        mcS = "+" + project.versionMC;
-    String fn = project.name + "-" + project.version + mcS + ".jar";
-    outputFile(file("../builds/" + fn));
+        mcS = "+" + project.versionMC
+    String fn = project.name + "-" + project.version + mcS + ".jar"
+    outputFile(fileInRoot("builds/" + fn))
 }
 
-// Dependencies
+/* General Dependencies */
 
 repositories {
     mavenCentral()
     mavenLocal()
 
+    // we are also publishing to this repo
     maven { url = 'https://s01.oss.sonatype.org/content/repositories/releases/' }
 }
 
@@ -117,18 +178,16 @@ dependencies {
     // External Libraries
     compileOnlyApi 'it.unimi.dsi:fastutil:8.5.8'
 
-//    api 'net.orbyfied.j8:j8-registry:0.1.0'
-    api 'net.orbyfied.j8:j8-util:0.2.1.3'
-//    api 'net.orbyfied.j8:j8-event:0.1.0_hotfix1'
+    compileOnlyApi 'net.orbyfied.j8:j8-util:0.2.1.3'
 
+    // Test Dependencies
     if (hasTesting()) {
-        // Test Dependencies
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
     }
 }
 
-// Test Configuration
+/* Test Configuration */
 
 if (hasTesting()) {
     test {
@@ -138,7 +197,7 @@ if (hasTesting()) {
 }
 
 
-// Publishing
+/* Publishing */
 
 if (hasPublishing()) {
 
@@ -160,38 +219,49 @@ if (hasPublishing()) {
                     // pom.xml properties
                     name = project.name
 
-                    String descStr = null
-                    if (project.hasProperty("desc"))
-                        descStr = project.desc
-                    description = "coldlib Module " + project.name + (descStr != null ? " - " + descStr : "")
+                    String descStr = propertyOr("desc", null)
+                    description = rootProject.name + " Module " + project.name + (descStr != null ? " - " + descStr : "")
 
-                    url = "https://github.com/cold-collective/coldlib"
-                    inceptionYear = "2022"
+                    url = propertyOr("projectUrl", "")
+                    inceptionYear = "" + new Date().getYear()
 
                     // licensing
                     licenses {
-                        license {
-                            name = "Apache License 2.0"
-                            url = "https://www.apache.org/licenses/LICENSE-2.0"
+                        String[] licenses = propertyOr("licenses", null);
+                        if (licenses != null) {
+                            for (String l : licenses) {
+                                String[] split = l.split(";")
+                                license {
+                                    name = split[0]
+                                    url  = split[1]
+                                }
+                            }
                         }
                     }
 
                     // developers
                     developers {
-                        developer {
-                            id = "orbyfied"
-                            name = "orbyfied"
-                            email = ""
+                        String[] devs = propertyOr("developers", null);
+                        if (devs != null) {
+                            for (String dev : devs) {
+                                String[] split = dev.split(" ")
+                                developer {
+                                    id = split[0]
+                                    name = split[1]
+                                    email = ""
+                                }
+                            }
                         }
                     }
 
                     // SCM
                     scm {
-                        connection = "scm:git:git:github.com/cold-collective/coldlib.git"
-                        developerConnection = "scm:git:ssh://github.com/cold-collective/coldlib.git"
-                        url = "https://github.com/cold-collective/coldlib.git"
-                    }
+                        String scmBaseUrl = propertyOr("scmBaseUrl", null)
 
+                        connection = "scm:git:git:" + scmBaseUrl
+                        developerConnection = "scm:git:ssh://" + scmBaseUrl
+                        url = "https://" + scmBaseUrl
+                    }
 
                 }
 
@@ -220,3 +290,53 @@ if (hasPublishing()) {
     }
 
 }
+
+/* .gitignore Security */
+
+// checks if the given string c contains
+// the given line l, aka checks for l + newln
+// or l + EOF (endsWith)
+private boolean hasLine(String c, String l) {
+    return c.contains(l + "\n") || c.endsWith(l)
+}
+
+// ensures that secret files are
+// excluded by a .gitignore
+void ensureGitignoreSecurity(Path file) {
+    try {
+        // get current content
+        String content;
+        if (Files.exists(file)) {
+            InputStream i = Files.newInputStream(file)
+            content = new String(i.readAllBytes(), StandardCharsets.UTF_8)
+            i.close()
+        } else content = ""
+
+        // append to content
+        StringBuilder b = new StringBuilder(content);
+        b.append("### SECURITY ###")
+        if (!hasLine(content, "gradle.properties"))
+            b.append("gradle.properties\n")
+        if (!hasLine(content, "secret-keys.gpg"))
+            b.append("secret-keys.gpg\n")
+        content = b.toString()
+
+        // write back content
+        OutputStream out = Files.newOutputStream(file, StandardOpenOption.CREATE)
+        out.write(content.getBytes(StandardCharsets.UTF_8))
+        out.close()
+    } catch (Exception e) {
+        System.err.println("Failed to ensure .gitignore security on " + file)
+        e.printStackTrace()
+    }
+}
+
+// create task
+task("secureGitignore") {
+    doLast {
+        ensureGitignoreSecurity(pathInRoot(".gitignore"))
+    }
+}
+
+// always do on reload
+ensureGitignoreSecurity(pathInRoot(".gitignore"))

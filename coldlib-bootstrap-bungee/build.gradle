@@ -1,0 +1,43 @@
+plugins {
+    // java
+    id 'java'
+    id 'java-library'
+
+    // package publishing
+    id 'maven-publish'
+    id 'signing'
+
+    // for shading in dependencies
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+version '1.0.0'
+
+ext {
+    hasMC = false
+    hasTesting = true
+    desc = "BungeeCord Boostrap"
+
+    versionMC = "1.19.2-R0.1-SNAPSHOT"
+}
+
+apply from: '../module.gradle', to: project
+
+repositories {
+    maven {
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
+
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+
+    maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url = 'https://oss.sonatype.org/content/repositories/central' }
+}
+
+dependencies {
+    compileOnlyApi 'net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT'
+
+    implementation project(":coldlib-common")
+}

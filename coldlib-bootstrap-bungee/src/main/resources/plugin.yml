@@ -1,0 +1,3 @@
+name: ColdlibBungee
+main: net.orbyfied.coldlib.ColdlibBungeePlugin
+version: 1.0.0
