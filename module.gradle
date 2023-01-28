@@ -303,6 +303,8 @@ private boolean hasLine(String c, String l) {
 // ensures that secret files are
 // excluded by a .gitignore
 void ensureGitignoreSecurity(Path file) {
+    if (project != rootProject)
+        return
     try {
         // get current content
         String content;
@@ -314,7 +316,7 @@ void ensureGitignoreSecurity(Path file) {
 
         // append to content
         StringBuilder b = new StringBuilder(content);
-        b.append("### SECURITY ###")
+        b.append("\n### SECURITY ###\n")
         if (!hasLine(content, "gradle.properties"))
             b.append("gradle.properties\n")
         if (!hasLine(content, "secret-keys.gpg"))
