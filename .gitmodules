@@ -1,0 +1,3 @@
+[submodule "buildsrc"]
+	path = buildsrc
+	url = https://github.com/cold-collective/buildsrc

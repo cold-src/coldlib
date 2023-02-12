@@ -14,15 +14,16 @@ plugins {
 version '1.0.3'
 
 ext {
-    hasMC = false
+    hasPaper = false
     hasTesting = true
     desc = "General purpose library"
-
-    versionMC = "1.19.2-R0.1-SNAPSHOT"
 }
 
-apply from: '../module.gradle', to: project
+apply from: '../buildsrc/module.gradle', to: project
 
 dependencies {
+    // External Libraries
+    compileOnlyApi 'it.unimi.dsi:fastutil:8.5.8'
 
+    compileOnlyApi 'net.orbyfied.j8:j8-util:0.2.1.3'
 }

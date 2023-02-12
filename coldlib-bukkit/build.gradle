@@ -18,14 +18,12 @@ group   'net.orbyfied.coldperms'
 version '1.0.0'
 
 ext {
-    hasMC = true
+    hasPaper = true
     hasTesting = false
     desc = "General purpose Bukkit library"
-
-//    versionMC = "1.19.2-R0.1-SNAPSHOT"
 }
 
-apply from: '../module.gradle', to: project
+apply from: '../buildsrc/module.gradle', to: project
 
 tasks {
     shadowJar {
@@ -39,5 +37,10 @@ tasks {
 dependencies {
 
     api project(':coldlib-common')
+
+    // External Libraries
+    compileOnlyApi 'it.unimi.dsi:fastutil:8.5.8'
+
+    compileOnlyApi 'net.orbyfied.j8:j8-util:0.2.1.3'
 
 }

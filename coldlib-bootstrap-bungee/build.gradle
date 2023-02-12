@@ -14,14 +14,12 @@ plugins {
 version '1.0.0'
 
 ext {
-    hasMC = false
+    hasPaper = false
     hasTesting = true
     desc = "BungeeCord Boostrap"
-
-    versionMC = "1.19.2-R0.1-SNAPSHOT"
 }
 
-apply from: '../module.gradle', to: project
+apply from: '../buildsrc/module.gradle', to: project
 
 repositories {
     maven {
@@ -40,4 +38,9 @@ dependencies {
     compileOnlyApi 'net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT'
 
     implementation project(":coldlib-common")
+
+    // External Libraries
+    compileOnlyApi 'it.unimi.dsi:fastutil:8.5.8'
+
+    compileOnlyApi 'net.orbyfied.j8:j8-util:0.2.1.3'
 }

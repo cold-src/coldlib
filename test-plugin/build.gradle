@@ -14,12 +14,12 @@ group   'net.orbyfied.coldperms'
 version '1.0.0'
 
 ext {
-    hasMC = true
+    hasPaper = true
     hasTesting = false
     desc = "Bukkit Test plugin"
 }
 
-apply from: '../module.gradle', to: project
+apply from: '../buildsrc/module.gradle', to: project
 
 dependencies {
     compileOnly project(":coldlib-bukkit")
