@@ -1,8 +1,6 @@
 package net.orbyfied.coldlib;
 
-import net.orbyfied.coldlib.util.Container;
-import net.orbyfied.j8.util.logging.EventLog;
-import net.orbyfied.j8.util.logging.EventLogs;
+import coldsrc.coldlib.util.Container;
 
 /**
  * Responsible for loading, bootstrapping
@@ -58,9 +56,6 @@ public abstract class ColdLibProvider {
 
         // load the provider
         load();
-
-        // get the event log
-        log = logGroup.getOrCreate("ColdLib");
     }
 
     /**
@@ -69,38 +64,11 @@ public abstract class ColdLibProvider {
     protected ColdLib lib;
 
     /**
-     * The library event log group.
-     */
-    protected EventLogs logGroup
-            = new EventLogs();
-
-    /**
-     * The main library log.
-     */
-    protected EventLog log;
-
-    /**
      * Get the library instance.
      * @return The library instance.
      */
     public ColdLib instance() {
         return lib;
-    }
-
-    /**
-     * Get the main event log.
-     * @return The event log.
-     */
-    public EventLog getLog() {
-        return log;
-    }
-
-    /**
-     * Get the main event log group.
-     * @return The event log group.
-     */
-    public EventLogs getLogGroup() {
-        return logGroup;
     }
 
     /**

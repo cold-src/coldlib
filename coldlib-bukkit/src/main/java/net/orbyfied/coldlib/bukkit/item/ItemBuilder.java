@@ -9,7 +9,6 @@ import net.orbyfied.coldlib.util.Self;
 import net.orbyfied.j8.util.reflect.Reflector;
 import org.bukkit.Material;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;

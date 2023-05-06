@@ -1,6 +1,4 @@
-package net.orbyfied.coldlib.util;
-
-import net.orbyfied.j8.util.ReflectionUtil;
+package coldsrc.coldlib.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,10 +171,10 @@ public interface Container<V> {
              * the function which called this.
              */
             private void checkAccess() {
-                StackTraceElement element = ReflectionUtil.getCallerFrame(2,
-                        element1 -> !element1.getClassName().startsWith("net.orbyfied.coldlib"));
-                if (!predicate.test(element))
-                    throw new SecurityException("Access to container denied");
+                throw new UnsupportedOperationException("TODO");
+//                StackTraceElement element = TODO;
+//                if (!predicate.test(element))
+//                    throw new SecurityException("Access to container denied");
             }
 
             @Override

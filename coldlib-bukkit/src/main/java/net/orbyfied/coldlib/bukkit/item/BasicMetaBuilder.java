@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.orbyfied.coldlib.bukkit.nms.LegacyNmsHelper;
 import net.orbyfied.coldlib.util.Container;
 import net.orbyfied.coldlib.util.Self;
-import net.orbyfied.coldlib.util.logic.BitFlag;
+import coldsrc.coldlib.util.logic.BitFlag;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;

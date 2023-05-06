@@ -1,8 +1,8 @@
-package net.orbyfied.coldlib.util.functional;
+package coldsrc.coldlib.util.functional;
 
-import net.orbyfied.coldlib.util.Container;
-import net.orbyfied.coldlib.util.Result;
-import net.orbyfied.coldlib.util.Throwables;
+import coldsrc.coldlib.util.Container;
+import coldsrc.coldlib.util.Result;
+import coldsrc.coldlib.util.Throwables;
 
 import java.util.function.Supplier;
 

@@ -1,4 +1,4 @@
-package net.orbyfied.coldlib.util;
+package coldsrc.coldlib.util;
 
 import java.util.function.Supplier;
 

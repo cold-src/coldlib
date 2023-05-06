@@ -1,6 +1,6 @@
-package net.orbyfied.coldlib.util.functional;
+package coldsrc.coldlib.util.functional;
 
-import net.orbyfied.coldlib.util.Throwables;
+import coldsrc.coldlib.util.Throwables;
 
 /**
  * A function callable with or

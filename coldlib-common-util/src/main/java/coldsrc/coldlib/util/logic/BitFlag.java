@@ -1,4 +1,4 @@
-package net.orbyfied.coldlib.util.logic;
+package coldsrc.coldlib.util.logic;
 
 import java.util.BitSet;
 

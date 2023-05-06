@@ -11,16 +11,16 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
-version '1.0.4'
+version '1.0.5'
 
 ext {
     hasPaper = false
     hasTesting = true
-    desc = "General purpose library"
+    desc = "General purpose static utility library"
 }
 
 apply from: '../buildsrc/module.gradle', to: project
 
 dependencies {
-    api project(":coldlib-common-util")
+
 }

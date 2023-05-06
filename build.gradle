@@ -6,8 +6,8 @@ ext {
     paperVersion = "1.19.2-R0.1-20221119.041019-155"
 
     // publishing
-    projectUrl = "https://github.com/cold-collective/coldlib"
-    scmBaseUrl = "github.com/cold-collective/coldlib.git"
+    projectUrl = "https://github.com/cold-src/coldlib"
+    scmBaseUrl = "github.com/cold-src/coldlib.git"
     licenses   = new String[] { "Apache License 2.0;https://www.apache.org/licenses/LICENSE-2.0" } as String[]
     developers = new String[] { "orbyfied;orbyfied" }
 

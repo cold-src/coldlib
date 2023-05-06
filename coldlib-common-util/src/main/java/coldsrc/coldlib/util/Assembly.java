@@ -1,8 +1,4 @@
-package net.orbyfied.coldlib.util;
-
-import net.orbyfied.coldlib.ColdLib;
-import net.orbyfied.coldlib.ColdLibProvider;
-import net.orbyfied.coldlib.ColdLibService;
+package coldsrc.coldlib.util;
 
 import java.util.ArrayList;
 import java.util.List;

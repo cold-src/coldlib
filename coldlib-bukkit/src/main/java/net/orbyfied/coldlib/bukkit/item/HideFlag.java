@@ -1,6 +1,6 @@
 package net.orbyfied.coldlib.bukkit.item;
 
-import net.orbyfied.coldlib.util.logic.BitFlag;
+import coldsrc.coldlib.util.logic.BitFlag;
 
 /**
  * Representation of hide flags for items,

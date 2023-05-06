@@ -1,7 +1,6 @@
 package net.orbyfied.coldlib;
 
-import net.orbyfied.coldlib.util.Container;
-import net.orbyfied.coldlib.util.functional.ThrowingSupplier;
+import coldsrc.coldlib.util.Container;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -179,10 +178,7 @@ public class ColdLib {
             // return service
             return service;
         } catch (Exception e) {
-            provider.getLog().newErr("create_service", "Failed to create service from " + sClass +
-                    " with instance name '" + instanceName + "'")
-                    .withError(e)
-                    .push();
+            e.printStackTrace();
             return null;
         }
     }

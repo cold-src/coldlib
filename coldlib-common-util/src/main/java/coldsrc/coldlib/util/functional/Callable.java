@@ -1,4 +1,4 @@
-package net.orbyfied.coldlib.util.functional;
+package coldsrc.coldlib.util.functional;
 
 import java.util.function.Consumer;
 

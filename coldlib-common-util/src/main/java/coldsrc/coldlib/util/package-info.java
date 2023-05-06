@@ -3,4 +3,4 @@
  * These do not need to be required
  * by services through the ColdLib instance.
  */
-package net.orbyfied.coldlib.util;
+package coldsrc.coldlib.util;

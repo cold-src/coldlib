@@ -8,7 +8,6 @@ import net.orbyfied.coldlib.util.Container;
 import net.orbyfied.coldlib.util.Self;
 import org.bukkit.enchantments.Enchantment;
 
-import static net.orbyfied.coldlib.bukkit.nms.NbtUtil.getOrCreateCompound;
 import static net.orbyfied.coldlib.bukkit.nms.NbtUtil.getOrCreateList;
 
 /**
